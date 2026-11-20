@@ -510,6 +510,11 @@ button, a, abbr{-webkit-tap-highlight-color:rgba(134,103,31,.15)}
 ul.items{list-style:none; padding-inline-start:4px}
 ul.items > li{position:relative; padding-inline-start:18px}
 ul.items > li::before{content:"–"; position:absolute; inset-inline-start:2px; top:0; color:var(--gold); font-weight:700; background:none; width:auto; height:auto}
+
+/* عنوان المسألة في «بين مذهبين» وخريطة الخلاف: رابط ظاهر إلى تفصيلها */
+a.sl2{color:var(--teal); text-decoration:underline; text-decoration-color:var(--gold); text-underline-offset:5px}
+a.sl2::after{content:" ‹ التفصيل"; font-weight:400; font-size:.78em; color:var(--gold); white-space:nowrap}
+.dg{font-size:1em; margin-top:16px}
 </style>
 </head>
 <body>
@@ -705,7 +710,7 @@ var pm=null,pi=0;
 function prayPick(){var b=$("#prayBox");b.style.removeProperty("--c");b.innerHTML='<button class="x" aria-label="إغلاق">×</button><h3 style="color:var(--teal)">تطهّر على مذهب</h3><p class="hint" style="margin:0">اختر مذهبًا، فتمرّ معه على مسائل الوضوء والغسل والتيمم مسألةً مسألة: خلاصة قوله فيها، وموضع بحثها في الكتاب.</p><div class="mpick">'+["hanafi","maliki","shafii","hanbali"].map(function(m){return '<button class="m-'+m+'" data-m="'+m+'">'+MN[m]+'</button>'}).join("")+'</div>';
   $(".x",b).onclick=function(){closeM("mPray")};$$(".mpick button",b).forEach(function(x){x.onclick=function(){pm=x.getAttribute("data-m");pi=0;prayStep()}})}
 function prayStep(){var st=D.apx[pm]||[],b=$("#prayBox"),s=st[pi];if(!s){prayPick();return}
-  b.className="mbox m-"+pm;var links=s[2].map(function(id){return '<a href="#'+id+'" data-g="'+id+'">'+(D.titles[id]||"").split("، ")[0]+'</a>'}).join(" · ");
+  b.className="mbox m-"+pm;var links=s[2].map(function(id){return '<a href="#'+id+'" data-g="'+id+'">'+esc(secName(id))+'</a>'}).join(" · ");
   b.innerHTML='<button class="x" aria-label="إغلاق">×</button><h3 style="color:var(--c)">الطهارة عند '+MN[pm]+'</h3><div class="dots"><i style="width:'+Math.round((pi+1)/st.length*100)+'%"></i></div><div class="step"><div class="sp">'+s[0]+' · الخطوة '+(pi+1).toLocaleString("ar-EG")+' من '+st.length.toLocaleString("ar-EG")+'</div><div class="sx">'+s[1]+'</div><div class="sl">'+(links?"تفصيله في: "+links:"")+'</div></div><div class="nav2"><button id="pPrev">السابق</button><button id="pAlt">مذهب آخر</button><button class="pri" id="pNext">'+(pi===st.length-1?"تمّت المسائل":"التالي")+'</button></div>';
   $(".x",b).onclick=function(){closeM("mPray")};$("#pPrev").disabled=pi===0;$("#pPrev").onclick=function(){pi--;prayStep()};$("#pAlt").onclick=prayPick;
   $("#pNext").onclick=function(){if(pi<st.length-1){pi++;prayStep()}else prayPick()};
@@ -740,7 +745,7 @@ $$(".quizbox").forEach(function(qb){var sid=qb.getAttribute("data-sid"),pool=ALL
 var MK=["hanafi","maliki","shafii","hanbali"],TAGS={G:"متفق عليه",B:"خلاف لا يؤثر في الصحة",R:"خلاف مؤثر في الصحة"};
 var pairA=store.get("pairA","hanafi"),pairB=store.get("pairB","shafii");
 function same(a,b){return norm(a).replace(/\s+/g," ").trim()===norm(b).replace(/\s+/g," ").trim()}
-function secLink(sid){return '<a href="#'+sid+'" data-g="'+sid+'">'+esc((D.titles[sid]||"").split("، ")[0])+'</a>'}
+function secLink(sid){return '<a class="sl2" href="#'+sid+'" data-g="'+sid+'">'+esc(secName(sid))+'</a>'}
 function wire(box){$$("a[data-g]",box).forEach(function(a){a.onclick=function(e){e.preventDefault();goSec(a.getAttribute("data-g"))}});var x=$(".x",box);if(x)x.onclick=function(){box.parentNode.classList.remove("show")}}
 function renderBetween(){var box=$("#betweenBox");
   var chips=function(which,cur){return MK.map(function(m){return '<button class="chip m-'+m+'" data-w="'+which+'" data-m="'+m+'" aria-pressed="'+(m===cur)+'">'+MN[m]+'</button>'}).join("")};
@@ -767,7 +772,7 @@ function renderMap(sel){var box=$("#mapBox"),mx=1;D.mas.forEach(function(r){var 
   box.innerHTML=html;wire(box);
   $$(".map td button:not(.z)",box).forEach(function(b){b.onclick=function(){$$(".map td button",box).forEach(function(x){x.classList.remove("sel")});b.classList.add("sel");showCell(b.getAttribute("data-s"),b.getAttribute("data-k"))}})}
 function showCell(sid,k){var box=$("#mapBox"),out=$("#mapSel",box),items=(D.tag[sid]||[]).filter(function(t){return t.k===k});
-  var h='<h3 style="color:var(--'+k+');margin-top:14px">'+TAGS[k]+' · '+esc((D.titles[sid]||"").split("، ")[0])+'</h3><ul class="dl">';
+  var h='<h3 style="color:var(--'+k+');margin-top:14px">'+TAGS[k]+' · '+secLink(sid)+'</h3><ul class="dl">';
   items.forEach(function(t){h+='<li class="di"><div class="dt">'+esc(t.t)+'</div>'+(t.v?'<div class="dv">'+MK.map(function(m){return '<div class="m-'+m+'"><b>'+MN[m]+':</b> '+esc(t.v[m]||"—")+'</div>'}).join("")+'</div>':'')+'</li>'});
   out.innerHTML=h+'</ul><p>'+secLink(sid)+'</p>';wire(out);out.scrollIntoView({block:"start"})}
 function openMap(){renderMap(null);openM("mMap")}
@@ -1202,6 +1207,8 @@ applyMarks();applyBm();
   var f=function(){showPageFor(s);s.scrollIntoView()};f();if(document.fonts&&document.fonts.ready)document.fonts.ready.then(f)})();
 /* فتح رابط فقرة مباشرة (#s5.12) */
 (function(){var h=decodeURIComponent(location.hash.slice(1));if(PK[h]){var f=function(){goTo(h,true)};if(document.fonts&&document.fonts.ready)document.fonts.ready.then(f);else setTimeout(f,300)}})();
+/* اسم القسم كاملًا: «المسألة الثانية: النية في الوضوء» */
+function secName(s){var t=(D.titles&&D.titles[s])||"",i=t.indexOf("، ");return i<0?t:t.slice(0,i)+": "+t.slice(i+2)}
 
 })();
 </script>
